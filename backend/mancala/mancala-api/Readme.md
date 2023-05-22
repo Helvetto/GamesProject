@@ -5,6 +5,8 @@ the API is `/mancala`.
 
 ## Technologies Used
 
+- Java 17: The latest version of the Java programming language, which offers new features and enhancements for
+  developing robust and efficient applications.
 - Spring Boot: A Java-based framework used for creating robust and scalable applications.
 - PostgreSQL: An open-source relational database management system (RDBMS) known for its reliability and performance.
 - Liquibase: A database schema management and versioning tool that helps in managing database changes over time.
