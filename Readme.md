@@ -71,3 +71,19 @@ This guide will walk you through the steps to run the Mancala Game Application, 
    The game web UI will be accessible at [http://localhost:8000](http://localhost:8000).
 
 If you want to play this game on the same device, you should open the URL in incognito mode or in a different browser.
+
+### Creating and Starting a New Game
+
+1. To create a new game and start it, click the "Start Game" button.
+2. Enter the desired number of stones (must be 4 or more) into the input field.
+3. Press "Enter" or click the "Create Game" button.
+4. Voila! You have created the game. Take note of the game ID, which can be found in the upper left corner of the screen or in the URL parameters.
+5. Share the game ID with another player to invite them to join your game.
+
+### Joining a Game
+
+1. To join an existing game, enter the game ID provided by the other player into the input field.
+2. Click the "Join Game" button.
+3. The game will automatically start, and the first player's turn will be randomly determined.
+
+Enjoy playing the game with your friends!

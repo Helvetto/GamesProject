@@ -143,7 +143,8 @@ If you have made any modifications to the environment variables, double-check th
 - Refactor the application to remove the CorsFilter dependency and integrate an Nginx proxy into the docker-compose
   setup. This will provide a more robust and efficient way to handle cross-origin requests.
 
-- Refactor the application to create a separate endpoint for starting the game and remove the starting game functionality
+- Refactor the application to create a separate endpoint for starting the game and remove the starting game
+  functionality
   from the join endpoint.
 
 - Implement Redis caching to improve performance and reduce load on the backend server.
@@ -158,3 +159,5 @@ If you have made any modifications to the environment variables, double-check th
 - Integrate Swagger for API documentation to provide a comprehensive and interactive documentation platform.
 
 - Add metrics for the database to monitor and analyze its performance.
+
+- Create a matchmaking system to allow users to join a random game if they prefer not to join a specific game.
