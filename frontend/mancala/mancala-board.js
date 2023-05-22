@@ -169,7 +169,7 @@ function drawPit(pit, isUpper) {
         const params = new URLSearchParams(window.location.search);
         const gameId = params.get('gameId');
         try {
-            const response = await fetch(`http://localhost:8080/mancala/sow?gameId=${gameId}&pitId=${pit.id}`, {
+            const response = await fetch(`http://mancala-api:8080/mancala/sow?gameId=${gameId}&pitId=${pit.id}`, {
                 withCredentials: true,
                 method: 'POST',
                 credentials: 'include'
@@ -221,7 +221,7 @@ window.onload = function () {
     const gameIdEl = document.querySelector('.game_id');
     gameIdEl.textContent = `Game ID: ${gameId}`;
 
-    fetch(`http://localhost:8080/mancala/info?gameId=${gameId}`, {
+    fetch(`http://mancala-api:8080/mancala/info?gameId=${gameId}`, {
         withCredentials: true,
         credentials: 'include'
     })
@@ -256,7 +256,7 @@ setInterval(() => {
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get('gameId');
     // Use the gameId parameter in the fetch call
-    fetch(`http://localhost:8080/mancala/info?gameId=${gameId}`, {
+    fetch(`http://mancala-api:8080/mancala/info?gameId=${gameId}`, {
         withCredentials: true,
         credentials: 'include'
     })
