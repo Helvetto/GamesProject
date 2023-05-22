@@ -175,7 +175,7 @@ function drawPit(pit, isUpper) {
                 credentials: 'include'
             });
             const data = await response.json();
-            if (response.status === 400) {
+            if (response.status >= 400 && response.status <= 500) {
                 const errorMessage = data.message;
                 alert(errorMessage);
                 throw new Error(errorMessage);
