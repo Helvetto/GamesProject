@@ -1,0 +1,6 @@
+spring:
+  jpa:
+    database: postgresql
+    show-sql: true
+  liquibase:
+    change-log: liquibase/changelog-master.xml

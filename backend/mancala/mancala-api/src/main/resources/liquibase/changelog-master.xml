@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+"
+>
+
+    <include file="liquibase/changelog/player.sql"/>
+    <include file="liquibase/changelog/game.sql"/>
+    <include file="liquibase/changelog/game_to_player_mapping.sql"/>
+    <include file="liquibase/changelog/player_active_games.sql"/>
+    <include file="liquibase/changelog/board.sql"/>
+    <include file="liquibase/changelog/mancala_game.sql"/>
+    <include file="liquibase/changelog/pit.sql"/>
+</databaseChangeLog>
