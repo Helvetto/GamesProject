@@ -8,7 +8,6 @@
 
     <include file="liquibase/changelog/player.sql"/>
     <include file="liquibase/changelog/game.sql"/>
-    <include file="liquibase/changelog/game_to_player_mapping.sql"/>
     <include file="liquibase/changelog/player_active_games.sql"/>
     <include file="liquibase/changelog/board.sql"/>
     <include file="liquibase/changelog/mancala_game.sql"/>
