@@ -230,7 +230,7 @@ window.onload = function () {
         })
         .then(data => {
             const gameStatusEl = document.querySelector('.game_status');
-            gameIdEl.textContent = `Game status: ${data.info.status}`;
+            gameStatusEl.textContent = `Game status: ${data.info.status}`;
 
             const gameWinnerEl = document.querySelector('.game_winner');
             const winner = data.info.winner;
