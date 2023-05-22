@@ -75,16 +75,17 @@ public interface MancalaGameDtoMapper {
      * @return the {@link PlayerDto} representing the winner, or {@code null} if there is no winner
      */
     default PlayerDto findWinner(Board board) {
-        var mancalaPits = board.getPits().stream()
+        var nonEmptyMancalaPits = board.getPits().stream()
                 .filter(pit -> pit.getType() == PitType.MANCALA)
+                .filter(pit -> !pit.isEmpty())
                 .toList();
 
-        int maxStoneCount = mancalaPits.stream()
+        int maxStoneCount = nonEmptyMancalaPits.stream()
                 .mapToInt(Pit::getStones)
                 .max()
-                .orElse(0);
+                .orElse(-1);
 
-        var winningPits = mancalaPits.stream()
+        var winningPits = nonEmptyMancalaPits.stream()
                 .filter(pit -> pit.getStones() == maxStoneCount)
                 .toList();
 
