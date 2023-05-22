@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Example</title>
+</head>
+<body>
+<button id="start-game-btn">Start Game</button>
+
+<script>
+    const startGameBtn = document.getElementById('start-game-btn');
+
+    startGameBtn.addEventListener('click', async () => {
+        const body = JSON.stringify({
+            numberOfStones: 4 // Replace with the desired value of numberOfStones
+        });
+        try {
+            const response = await fetch('http://localhost:8080/mancala/create', {
+                withCredentials: true,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    numberOfStones: 4 // Replace with the desired value of numberOfStones
+                }),
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            const gameId = data.id; // Extract the parameter from the response
+
+            // Redirect to the new page passing the parameter as a query string parameter
+            window.location.href = `/mancala-board.html?gameId=${gameId}`;
+        } catch (error) {
+            console.error('Error starting game:', error);
+        }
+    });
+</script>
+<label for="game-id-input">Enter game ID:</label>
+<input type="text" id="game-id-input">
+<button id="join-game-btn">Join Game</button>
+<script>
+    const joinGameBtn = document.getElementById('join-game-btn');
+
+    joinGameBtn.addEventListener('click', async () => {
+        const gameId = document.getElementById('game-id-input').value;
+        try {
+            const response = await fetch(`http://localhost:8080/mancala/join?gameId=${gameId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+            console.log(response);
+            // Redirect to the new page passing the parameter as a query string parameter
+            window.location.href = `/mancala-board.html?gameId=${gameId}`;
+        } catch (error) {
+            console.error('Error joining game:', error);
+        }
+    });
+</script>
+
+
+</body>
+</html>
