@@ -106,11 +106,11 @@ public interface MancalaGameDtoMapper {
     default boolean isDraw(Board board) {
         var count = board.getPits().stream()
                 .filter(pit -> pit.getType() == PitType.MANCALA)
+                .filter(pit -> !pit.isEmpty())
                 .map(Pit::getStones)
                 .distinct()
                 .count();
-        return count <= 1 && count != 0;
-
+        return count <= 1;
     }
 
     private static PlayerDto getPlayerDto(Player playerTurn, List<Long> newPlayerIds, Player player) {

@@ -229,6 +229,21 @@ window.onload = function () {
             return response.json();
         })
         .then(data => {
+            const gameStatusEl = document.querySelector('.game_status');
+            gameIdEl.textContent = `Game status: ${data.info.status}`;
+
+            const gameWinnerEl = document.querySelector('.game_winner');
+            const winner = data.info.winner;
+            const draw = data.info.draw;
+
+            if (winner !== null) {
+                gameWinnerEl.textContent = `Game winner: ${winner.id}`;
+            } else if (draw) {
+                gameWinnerEl.textContent = "Game ended in a draw";
+            }
+            return data
+        })
+        .then(data => {
             // call the drawBoard function with the JSON data
             drawBoard(data);
         })
