@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  # Definition of the 'db' service
+  db:
+    # Use the 'postgres' image from Docker Hub
+    image: postgres
+
+    # Assign a name to the container
+    container_name: "dbpos"
+
+    # Environment variables for the container
+    environment:
+      # Set the password for the PostgreSQL database, using the value of the 'POSTGRES_PASSWORD' environment variable.
+      # If 'POSTGRES_PASSWORD' is not set, use the default value 'postgres'.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+      # Set the username for the PostgreSQL database, using the value of the 'POSTGRES_USER' environment variable.
+      # If 'POSTGRES_USER' is not set, use the default value 'postgres'.
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+
+      # Set the name of the PostgreSQL database to 'postgres'
+      POSTGRES_DB: postgres
+
+      # Set the hostname of the 'db' service to 'dbpos'
+      DB_HOST: dbpos
+
+  # Definition of the 'mancala-api' service
+  mancala-api:
+    # Use the 'mancala-api' image
+    image: mancala-api
+
+    # Assign a name to the container
+    container_name: mancala-api
+
+    # Specify that the 'mancala-api' service depends on the 'db' service.
+    # This ensures that the 'db' service is started before the 'mancala-api' service.
+    depends_on:
+      - db
+
+  # Definition of the 'mancala-api' service
+  mancala-web:
+    # Use the 'mancala-api' image
+    image: mancala-web
+
+    # Assign a name to the container
+    container_name: mancala-web
+
+    # Map port 8080 on the host to port 8080 in the container.
+    # This allows accessing the 'mancala-api' service from the host machine.
+    ports:
+      - "8000:8000"
