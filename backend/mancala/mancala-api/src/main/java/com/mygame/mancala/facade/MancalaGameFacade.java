@@ -1,7 +1,5 @@
 package com.mygame.mancala.facade;
 
-import java.util.List;
-
 import com.mygame.mancala.DTO.CreateMancalaGameParamsDto;
 import com.mygame.mancala.DTO.MancalaGameDto;
 import com.mygame.mancala.mapper.MancalaGameDtoMapper;
@@ -10,10 +8,8 @@ import com.mygame.mancala.service.MancalaGameCreationService;
 import com.mygame.mancala.service.MancalaGamePlayService;
 import com.mygame.mancala.service.MancalaJoinGameService;
 import com.mygame.mancala.service.MancalaUtilService;
-import com.mygame.model.entity.Player;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +44,6 @@ public class MancalaGameFacade {
         return mapper.map(game);
     }
 
-    @Cacheable(value = "game")
     public MancalaGameDto getInfo(Long gameId) {
         return mapper.map(gameRepository.findByIdOrThrow(gameId));
     }
