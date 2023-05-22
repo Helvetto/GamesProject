@@ -43,12 +43,12 @@ public class MancalaGameFacadeUnitTest extends MockitoUnitTest {
         var game = mock(MancalaGame.class);
         when(game.getId()).thenReturn(1L);
         when(gameCreationService.createGame(any())).thenReturn(game);
-        when(joinGameService.joinGame(anyLong())).thenReturn(game);
+        when(joinGameService.joinGame(anyLong(), anyLong())).thenReturn(game);
 
-        facade.createAndJoinGame(dto);
+        facade.createAndJoinGame(dto, 1L);
 
         verify(gameCreationService).createGame(dto);
-        verify(joinGameService).joinGame(any(Long.class));
+        verify(joinGameService).joinGame(any(Long.class), any(Long.class));
     }
 
     @Test

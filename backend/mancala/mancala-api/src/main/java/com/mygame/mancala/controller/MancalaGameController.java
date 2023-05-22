@@ -40,7 +40,9 @@ public class MancalaGameController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        var game = facade.createAndJoinGame(createGameParamsDto);
+        var session = request.getSession();
+        Long playerId = ControllerHelper.getPlayerIdSessionAttribute(session);
+        var game = facade.createAndJoinGame(createGameParamsDto, playerId);
         return getMancalaGameDtoResponseEntity(request, response, game);
     }
 

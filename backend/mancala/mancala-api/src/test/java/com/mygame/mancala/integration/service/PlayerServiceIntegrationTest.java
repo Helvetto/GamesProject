@@ -20,7 +20,7 @@ public class PlayerServiceIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldRemoveGameFromActive() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var playerBeforeRemove = transactionTemplate.execute(ts -> {
             var player = playerRepository.findByIdOrThrow(game.players().get(0).id());
             Assertions.assertThat(player.getActiveGames()).hasSize(1);
@@ -38,7 +38,7 @@ public class PlayerServiceIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldRemoveGameFromActiveIdempotently() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var playerBeforeRemove = transactionTemplate.execute(ts -> {
             var player = playerRepository.findByIdOrThrow(game.players().get(0).id());
             Assertions.assertThat(player.getActiveGames()).hasSize(1);

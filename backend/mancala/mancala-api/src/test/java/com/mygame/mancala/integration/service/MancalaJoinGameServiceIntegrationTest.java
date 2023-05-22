@@ -21,17 +21,6 @@ public class MancalaJoinGameServiceIntegrationTest extends IntegrationTest {
     private final MancalaGameCreationService gameCreationService;
     private final PlayerRepository playerRepository;
 
-
-    @Test
-    void shouldJoinAnEmptyGameAndCreatePlayer() {
-        var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
-        game = joinGameService.joinGame(game.getId());
-
-        assertThat(game.getPlayers().size()).isEqualTo(1);
-        assertThat(game.getStatus()).isEqualTo(MancalaGameStatus.NOT_STARTED);
-        assertThat(game.isFull()).isFalse();
-    }
-
     @Test
     void shouldJoinAnEmptyGameWithCreatedUser() {
         var player = playerRepository.save(new Player());

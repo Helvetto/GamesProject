@@ -63,7 +63,7 @@ public class MancalaControllerTest {
         var players = List.of(new PlayerDto(1L, false, true));
         var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.NOT_STARTED, null, false), null);
 
-        when(facade.createAndJoinGame(any())).thenReturn(responseDto);
+        when(facade.createAndJoinGame(any(), any())).thenReturn(responseDto);
 
         var result = mvc.perform(
                         post("/mancala/create")

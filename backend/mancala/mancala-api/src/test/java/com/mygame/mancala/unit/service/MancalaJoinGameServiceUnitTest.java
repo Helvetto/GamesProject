@@ -59,25 +59,6 @@ public class MancalaJoinGameServiceUnitTest extends MockitoUnitTest {
     }
 
     @Test
-    public void testJoinGame() {
-        var player = new Player();
-        var game = new MancalaGame(board, List.of());
-        long gameId = 1L;
-
-        when(gameRepository.findByIdOrThrow(gameId)).thenReturn(game);
-        when(gameRepository.save(any(MancalaGame.class))).thenAnswer(i -> i.getArguments()[0]);
-        when(playerRepository.save(any(Player.class))).thenReturn(player);
-
-        var result = joinGameService.joinGame(gameId);
-
-        Assertions.assertEquals(game, result);
-        Assertions.assertEquals(MancalaGameStatus.NOT_STARTED, result.getStatus());
-        Assertions.assertEquals(1, result.getPlayers().size());
-        Assertions.assertEquals(player, result.getPlayers().get(0));
-        verify(gameRepository, times(1)).save(game);
-    }
-
-    @Test
     public void testJoinGameWithPlayerId() {
         var player1 = new Player();
         var player2 = new Player();

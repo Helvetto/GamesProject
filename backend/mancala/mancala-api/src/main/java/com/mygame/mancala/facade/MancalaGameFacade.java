@@ -24,9 +24,9 @@ public class MancalaGameFacade {
     private final GameRepository gameRepository;
 
     @Transactional
-    public MancalaGameDto createAndJoinGame(CreateMancalaGameParamsDto dto) {
+    public MancalaGameDto createAndJoinGame(CreateMancalaGameParamsDto dto, @Nullable Long playerId) {
         var createdGame = gameCreationService.createGame(dto);
-        createdGame = joinGameService.joinGame(createdGame.getId());
+        createdGame = joinGameService.joinGame(createdGame.getId(), playerId);
         return mapper.map(createdGame, createdGame.getPlayers());
     }
 

@@ -27,7 +27,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
     @Test
     void shouldThrowWhenTryingCreateAndJoinGame() {
         var exception = assertThrows(
-                GameIllegalArgumentException.class, () -> facade.createAndJoinGame(new CreateMancalaGameParamsDto(3))
+                GameIllegalArgumentException.class, () -> facade.createAndJoinGame(new CreateMancalaGameParamsDto(3), 1L)
         );
 
         Assertions.assertThat(exception.getMessage()).contains("Number of stones must be at least");
@@ -35,7 +35,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldCreateAndJoinGame() {
-        var result = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var result = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
 
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.id()).isNotNull();
@@ -46,7 +46,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldJoinCreatedGameWithNewPlayerAndStartIt() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
 
         var result = facade.joinGame(game.id(), null);
 
@@ -58,7 +58,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldDoNothingWhenTryingToJoinAGameWithAnExistingPlayer() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
 
         var result = facade.joinGame(game.id(), game.players().get(0).id());
 
@@ -70,7 +70,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldNotAllowToJoinFullGame() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         facade.joinGame(game.id(), null);
 
         assertThrows(
@@ -80,7 +80,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldSow() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var gamyCopyForLambda = game;
         game = facade.joinGame(game.id(), null);
 
@@ -96,7 +96,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldThrowOnWrongPlayerTurn() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var gamyCopyForLambda = game;
         game = facade.joinGame(game.id(), null);
 
@@ -117,7 +117,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldThrowOnWrongPitToStartWith() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var gamyCopyForLambda = game;
         game = facade.joinGame(game.id(), null);
 
@@ -139,7 +139,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     @Test
     void shouldThrowOnEmptyPitToStartWith() {
-        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4));
+        var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var gamyCopyForLambda = game;
         game = facade.joinGame(game.id(), null);
 

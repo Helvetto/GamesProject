@@ -16,6 +16,7 @@ import com.mygame.mancala.repository.PitRepository;
 import com.mygame.model.entity.Game;
 import com.mygame.model.entity.Player;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repository.PlayerRepository;
@@ -29,12 +30,7 @@ public class MancalaJoinGameService {
     private final GameRepository gameRepository;
 
     @Transactional
-    public MancalaGame joinGame(long gameId) {
-        return joinGame(gameId, null);
-    }
-
-    @Transactional
-    public MancalaGame joinGame(Long gameId, Long playerId) {
+    public MancalaGame joinGame(Long gameId, @Nullable Long playerId) {
         var game = gameRepository.findByIdOrThrow(gameId);
 
         if (game.getPlayers().stream()
