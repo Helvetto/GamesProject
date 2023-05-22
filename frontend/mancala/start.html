@@ -10,8 +10,16 @@
     const startGameBtn = document.getElementById('start-game-btn');
 
     startGameBtn.addEventListener('click', async () => {
+        const numberOfStonesInput = prompt('Enter the number of stones:');
+        const numberOfStones = parseInt(numberOfStonesInput);
+
+        if (isNaN(numberOfStones) || numberOfStones <= 0) {
+            alert('Invalid number of stones');
+            return;
+        }
+
         const body = JSON.stringify({
-            numberOfStones: 4 // Replace with the desired value of numberOfStones
+            numberOfStones: numberOfStones
         });
         try {
             const response = await fetch('http://localhost:8080/mancala/create', {
@@ -20,9 +28,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    numberOfStones: 4 // Replace with the desired value of numberOfStones
-                }),
+                body: body,
                 credentials: 'include'
             });
             const data = await response.json();
