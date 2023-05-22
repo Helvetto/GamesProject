@@ -239,4 +239,41 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
 
         Assertions.assertThat(result.getPlayerTurn().getId()).isEqualTo(game.getPlayerTurn().getId());
     }
+
+    @Test
+    void shouldCaptureOppositeStonesAndAddToMancala() {
+        var playerOne = playerRepository.save(new Player());
+        var playerTwo = playerRepository.save(new Player());
+
+        var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
+        game = joinGameService.joinGame(game.getId(), playerOne.getId());
+        game = joinGameService.joinGame(game.getId(), playerTwo.getId());
+        var gameVarForLambda = game;
+
+        var pitToStart = game.getBoard().getPits().stream()
+                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                .filter(pit -> pit.getType() != PitType.MANCALA)
+                .filter(pit -> pit.getNextPit().getType() != PitType.MANCALA)
+                .findFirst()
+                .orElseThrow();
+
+        pitToStart.clear();
+        pitToStart.addStones(1);
+
+        var nextPit = pitToStart.getNextPit();
+        nextPit.clear();
+        pitRepository.save(pitToStart);
+        pitRepository.save(nextPit);
+
+        var result = sowService.sow(gameVarForLambda.getId(), pitToStart.getId(),
+                gameVarForLambda.getPlayerTurn().getId());
+
+        var resultMancala = result.getBoard().getPits().stream()
+                .filter(pit -> pit.getType() == PitType.MANCALA)
+                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                .findFirst()
+                .orElseThrow();
+
+        Assertions.assertThat(resultMancala.getStones()).isEqualTo(5); // 4 from the other player pit + 1 from your pit
+    }
 }

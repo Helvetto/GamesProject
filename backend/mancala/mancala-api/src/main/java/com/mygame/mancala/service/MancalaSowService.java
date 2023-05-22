@@ -100,7 +100,7 @@ public class MancalaSowService {
             pit.sow();
             stonesToSow--;
 
-            if (shouldCaptureStones(pit, game.getPlayerTurn())) {
+            if (shouldCaptureStones(pit, game.getPlayerTurn(), stonesToSow)) {
                 captureStones(pit, findOppositePit(pit), game.getBoard());
             }
         }
@@ -162,8 +162,8 @@ public class MancalaSowService {
      * @param player the current player
      * @return true if the pit should be captured, false otherwise
      */
-    private boolean shouldCaptureStones(Pit pit, Player player) {
-        return pit.getPlayer() == player && pit.getType() == PitType.NORMAL && pit.getStones() == 1;
+    private boolean shouldCaptureStones(Pit pit, Player player, int stonesLeft) {
+        return stonesLeft == 0 & pit.getPlayer() == player && pit.getType() == PitType.NORMAL && pit.getStones() == 1;
     }
 
     /**
