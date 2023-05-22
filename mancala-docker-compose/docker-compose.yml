@@ -38,15 +38,23 @@ services:
     depends_on:
       - db
 
-  # Definition of the 'mancala-api' service
+  # Definition of the 'mancala-web' service
   mancala-web:
-    # Use the 'mancala-api' image
+    # Use the 'mancala-web' image
     image: mancala-web
 
     # Assign a name to the container
     container_name: mancala-web
 
-    # Map port 8080 on the host to port 8080 in the container.
-    # This allows accessing the 'mancala-api' service from the host machine.
+    # Map port 8000 on the host to port 8000 in the container.
+    # This allows accessing the 'mancala-web' service from the host machine.
     ports:
       - "8000:8000"
+
+  nginx:
+    image: nginx
+    ports:
+      - "8080:80"
+    container_name: nginx-mancala
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf

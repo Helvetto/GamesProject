@@ -169,7 +169,7 @@ function drawPit(pit, isUpper) {
         const params = new URLSearchParams(window.location.search);
         const gameId = params.get('gameId');
         try {
-            const response = await fetch(`http://mancala-api:8080/mancala/sow?gameId=${gameId}&pitId=${pit.id}`, {
+            const response = await fetch(`http://localhost:8080/mancala/sow?gameId=${gameId}&pitId=${pit.id}`, {
                 withCredentials: true,
                 method: 'POST',
                 credentials: 'include'
@@ -221,7 +221,7 @@ window.onload = function () {
     const gameIdEl = document.querySelector('.game_id');
     gameIdEl.textContent = `Game ID: ${gameId}`;
 
-    fetch(`http://mancala-api:8080/mancala/info?gameId=${gameId}`, {
+    fetch(`http://localhost:8080/mancala/info?gameId=${gameId}`, {
         withCredentials: true,
         credentials: 'include'
     })
@@ -239,9 +239,9 @@ window.onload = function () {
             if (winner !== null) {
                 gameWinnerEl.textContent = `Game winner: ${winner.id}`;
             } else if (draw) {
-                gameWinnerEl.textContent = "Game ended in a draw";
+                gameWinnerEl.textContent = 'Game ended in a draw';
             }
-            return data
+            return data;
         })
         .then(data => {
             // call the drawBoard function with the JSON data
@@ -256,12 +256,27 @@ setInterval(() => {
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get('gameId');
     // Use the gameId parameter in the fetch call
-    fetch(`http://mancala-api:8080/mancala/info?gameId=${gameId}`, {
+    fetch(`http://localhost:8080/mancala/info?gameId=${gameId}`, {
         withCredentials: true,
         credentials: 'include'
     })
         .then(response => {
             return response.json();
+        })
+        .then(data => {
+            const gameStatusEl = document.querySelector('.game_status');
+            gameStatusEl.textContent = `Game status: ${data.info.status}`;
+
+            const gameWinnerEl = document.querySelector('.game_winner');
+            const winner = data.info.winner;
+            const draw = data.info.draw;
+
+            if (winner !== null) {
+                gameWinnerEl.textContent = `Game winner: ${winner.id}`;
+            } else if (draw) {
+                gameWinnerEl.textContent = 'Game ended in a draw';
+            }
+            return data;
         })
         .then(data => {
             // call the drawBoard function with the JSON data

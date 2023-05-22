@@ -22,7 +22,7 @@
             numberOfStones: numberOfStones
         });
         try {
-            const response = await fetch('http://mancala-api:8080/mancala/create', {
+            const response = await fetch('http://localhost:8080/mancala/create', {
                 withCredentials: true,
                 method: 'POST',
                 headers: {
@@ -51,7 +51,7 @@
     joinGameBtn.addEventListener('click', async () => {
         const gameId = document.getElementById('game-id-input').value;
         try {
-            const response = await fetch(`http://mancala-api:8080/mancala/join?gameId=${gameId}`, {
+            const response = await fetch(`http://localhost:8080/mancala/join?gameId=${gameId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
