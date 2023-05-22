@@ -64,11 +64,29 @@ This guide will walk you through the steps to run the Mancala Game Application, 
 
 4. Start the Docker containers using Docker Compose:
 
-   ```shell
-   docker-compose -f mancala-docker-compose/docker-compose.yml up
-   ```
+To run the application with an Nginx proxy, you may encounter some issues related to file access. To resolve this, you
+have two options:
 
-   The game web UI will be accessible at [http://localhost:8000](http://localhost:8000).
+Option 1: Allowing Docker to Open Your Files
+
+1. Ensure that the necessary permissions are granted for Docker to access your files.
+2. Start the Docker containers using the following command:
+
+```shell
+docker-compose -f mancala-docker-compose/docker-compose.yml up
+```
+
+Option 2: Running Docker Compose without Nginx
+
+1. Execute the following command to start the containers without Nginx:
+
+```shell
+docker-compose -f mancala-docker-compose/without-nginx/docker-compose.yml up
+```
+
+Please choose the option that suits your requirements and system setup.
+
+Note: Regardless of the option you choose, the game web UI will be accessible at http://localhost:8000.
 
 If you want to play this game on the same device, you should open the URL in incognito mode or in a different browser.
 
@@ -77,7 +95,8 @@ If you want to play this game on the same device, you should open the URL in inc
 1. To create a new game and start it, click the "Start Game" button.
 2. Enter the desired number of stones (must be 4 or more) into the input field.
 3. Press "Enter" or click the "Create Game" button.
-4. Voila! You have created the game. Take note of the game ID, which can be found in the upper left corner of the screen or in the URL parameters.
+4. Voila! You have created the game. Take note of the game ID, which can be found in the upper left corner of the screen
+   or in the URL parameters.
 5. Share the game ID with another player to invite them to join your game.
 
 ### Joining a Game
@@ -87,3 +106,50 @@ If you want to play this game on the same device, you should open the URL in inc
 3. The game will automatically start, and the first player's turn will be randomly determined.
 
 Enjoy playing the game with your friends!
+
+## Troubleshooting
+
+If you encounter problems while running the application, you can try the following troubleshooting steps:
+
+1. **Force Restart Docker Compose**: If you experience issues with the application, try relaunching Docker Compose with
+   the `--force-recreate` option. This command forces the recreation of containers, which can help resolve certain
+   inconsistencies. Run the following command:
+
+   ```shell
+   docker-compose -f mancala-docker-compose/docker-compose.yml up --force-recreate
+   ```
+
+2. **Delete Existing Images and Containers**: Sometimes, conflicts with existing images or containers can cause
+   problems. To eliminate this possibility, you can delete all existing images and containers related to the
+   application. Use the following commands to remove them:
+
+   ```shell
+   docker-compose -f mancala-docker-compose/docker-compose.yml down
+   docker ps -a | grep 'mancala-' | awk '{print $1}' | xargs docker rm
+   docker images | grep 'mancala-' | awk '{print $3}' | xargs docker rmi
+   ```
+
+   Caution: The above commands remove all containers and images with names containing 'mancala-'. Make sure you don't
+   have any important data stored in other containers or images before executing them.
+
+3. **Run Containers Independently**: Instead of using Docker Compose, you can try running the backend and frontend
+   containers independently. Use the following steps:
+
+   a. Run the backend container using Docker Compose:
+   ```shell
+   docker-compose -f backend/mancala/mancala-api/docker-compose.yml up
+   ```
+
+   b. Build and run the frontend container using the Dockerfile:
+   ```shell
+   cd frontend/mancala
+   docker build -t mancala-web .
+   docker run -p 8000:8000 mancala-web
+   ```
+
+4. **Alternative Tools**: If the above steps don't resolve the issue, you can try running the application using IntelliJ
+   IDEA or any other suitable development tool. Keep in mind that you need to configure the database connection and
+   update it in the application properties accordingly.
+
+Remember to consult the application's documentation or seek assistance if the troubleshooting steps don't resolve your
+problem.
