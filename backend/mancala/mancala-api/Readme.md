@@ -5,6 +5,8 @@ the API is `/mancala`.
 
 ## Technologies Used
 
+- Gradle: A powerful build automation tool used for managing dependencies and building, testing, and deploying software
+  projects.
 - Java 17: The latest version of the Java programming language, which offers new features and enhancements for
   developing robust and efficient applications.
 - Spring Boot: A Java-based framework used for creating robust and scalable applications.
