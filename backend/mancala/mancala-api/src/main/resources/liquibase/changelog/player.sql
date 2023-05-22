@@ -1,9 +1,10 @@
 --liquibase formatted sql
 
---changeset Helvetto:create_player
+--changeset Andrew:create_player
 create table player
 (
     id              bigserial not null,
-    active_game_ids bigint[],
     primary key (id)
-)
+);
+
+COMMENT ON TABLE player IS 'This table represents a player.';
