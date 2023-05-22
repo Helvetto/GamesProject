@@ -21,12 +21,12 @@ function drawBoard(boardData) {
 
     if (lowerPlayer != null) {
         const lowerPlayerEl = document.querySelector('.upper-player');
-        lowerPlayerEl.textContent = `Player ID: ${lowerPlayer.id}`;
+        lowerPlayerEl.textContent = `This side of board belongs to the player with ID: ${lowerPlayer.id}`;
     }
 
     if (upperPlayer != null) {
         const upperPlayerEl = document.querySelector('.lower-player');
-        upperPlayerEl.textContent = `Player ID: ${upperPlayer.id}`;
+        upperPlayerEl.textContent = `This side of board belongs to the player with ID: ${upperPlayer.id}`;
     }
 
     if (lowerPlayer != null && upperPlayer != null) {
