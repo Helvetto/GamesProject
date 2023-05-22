@@ -3,6 +3,7 @@ package com.mygame.mancala.unit.service;
 import java.util.List;
 
 import com.mygame.exception.GameIllegalArgumentException;
+import com.mygame.mancala.model.MancalaGameStatus;
 import com.mygame.mancala.unit.MockitoUnitTest;
 import com.mygame.mancala.model.Board;
 import com.mygame.mancala.model.MancalaGame;
@@ -10,10 +11,14 @@ import com.mygame.mancala.model.pit.Pit;
 import com.mygame.mancala.model.pit.PitType;
 import com.mygame.mancala.repository.GameRepository;
 import com.mygame.mancala.service.MancalaSowService;
+import com.mygame.model.entity.Game;
 import com.mygame.model.entity.Player;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,6 +42,12 @@ public class MancalaSowServiceUnitTest extends MockitoUnitTest {
 
 
     private final Long gameId = 1L;
+    private final MancalaGame game = Mockito.mock(MancalaGame.class);
+
+    @BeforeEach
+    void init() {
+        when(game.getStatus()).thenReturn(MancalaGameStatus.IN_PROGRESS);
+    }
 
     @Test
     void testSowWithInvalidPitOwnership() {
@@ -45,7 +56,6 @@ public class MancalaSowServiceUnitTest extends MockitoUnitTest {
         var pits = List.of(
                 normalPit1ForPlayerOneMock, normalPit1ForPlayerTwoMock
         );
-        var game = mock(MancalaGame.class);
 
         when(playerOne.getId()).thenReturn(1L);
         when(playerTwo.getId()).thenReturn(2L);
@@ -63,7 +73,7 @@ public class MancalaSowServiceUnitTest extends MockitoUnitTest {
     }
 
     @Test
-    void testSowWithInvalidGameStarted() {
+    void testSowWithInvalidGameStatus() {
         var normalPit1ForPlayerOneMock = mock(Pit.class);
         var normalPit2ForPlayerOneMock = mock(Pit.class);
         var normalPit3ForPlayerOneMock = mock(Pit.class);
@@ -82,17 +92,17 @@ public class MancalaSowServiceUnitTest extends MockitoUnitTest {
                 normalPit2ForPlayerTwoMock, normalPit3ForPlayerTwoMock, normalPit4ForPlayerTwoMock,
                 mancalaPitForPlayerTwoMock
         );
-        var game = mock(MancalaGame.class);
 
 
         when(normalPit1ForPlayerTwoMock.getId()).thenReturn(Long.valueOf(5));
         when(board.getPits()).thenReturn(pits);
         when(gameRepository.findByIdOrThrow(gameId)).thenReturn(game);
+        when(game.getStatus()).thenReturn(MancalaGameStatus.FINISHED);
 
         var exception = assertThrows(GameIllegalArgumentException.class, () ->
                 sowService.sow(gameId, board.getPits().get(5).getId(), playerTwo.getId()));
 
-        assertEquals("Game " + game.getId() + " has not started yet", exception.getMessage());
+        Assertions.assertThat(exception.getMessage()).contains("has invalid status");
     }
 
     @Test
@@ -102,7 +112,6 @@ public class MancalaSowServiceUnitTest extends MockitoUnitTest {
         var pits = List.of(
                 normalPit1ForPlayerOneMock, normalPit1ForPlayerTwoMock
         );
-        var game = mock(MancalaGame.class);
 
         when(playerOne.getId()).thenReturn(1L);
         when(playerTwo.getId()).thenReturn(2L);
@@ -125,7 +134,6 @@ public class MancalaSowServiceUnitTest extends MockitoUnitTest {
         var pits = List.of(
                 normalPitForPlayerOneMock, normalPitForPlayerTwoMock
         );
-        var game = mock(MancalaGame.class);
 
         when(normalPitForPlayerOneMock.isEmpty()).thenReturn(true);
         when(playerOne.getId()).thenReturn(1L);
@@ -151,7 +159,6 @@ public class MancalaSowServiceUnitTest extends MockitoUnitTest {
         var pits = List.of(
                 normalPitForPlayerOneMock, mancalaPitForPlayerTwoMock
         );
-        var game = mock(MancalaGame.class);
 
         when(mancalaPitForPlayerTwoMock.getType()).thenReturn(PitType.MANCALA);
         when(mancalaPitForPlayerTwoMock.getId()).thenReturn(11L);
@@ -172,8 +179,6 @@ public class MancalaSowServiceUnitTest extends MockitoUnitTest {
 
     @Test
     void testSowWithGrabbingOpponentStones() {
-        var game = mock(MancalaGame.class);
-
         var normalPit1ForPlayerOneMock = mock(Pit.class);
         var normalPit2ForPlayerOneMock = mock(Pit.class);
         var mancalaPitForPlayerOneMock = mock(Pit.class);

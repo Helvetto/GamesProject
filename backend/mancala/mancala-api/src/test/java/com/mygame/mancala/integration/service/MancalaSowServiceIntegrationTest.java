@@ -49,7 +49,7 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
                 GameIllegalArgumentException.class, () -> sowService.sow(game.getId(), -1L, -1L)
         );
 
-        Assertions.assertThat(exception.getMessage()).isEqualTo("Game " + game.getId() + " has not started yet");
+        Assertions.assertThat(exception.getMessage()).contains("has invalid status");
     }
 
 

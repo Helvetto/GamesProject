@@ -7,6 +7,7 @@ import com.mygame.exception.EntityNotFoundException;
 import com.mygame.exception.GameIllegalArgumentException;
 import com.mygame.mancala.model.Board;
 import com.mygame.mancala.model.MancalaGame;
+import com.mygame.mancala.model.MancalaGameStatus;
 import com.mygame.mancala.model.pit.Pit;
 import com.mygame.mancala.model.pit.PitType;
 import com.mygame.mancala.repository.GameRepository;
@@ -33,7 +34,7 @@ public class MancalaSowService {
     }
 
     private void validate(Long pitId, Long playerId, MancalaGame game) {
-        validateGameStarted(game);
+        validateGameStatus(game);
         validateNotMancalaPit(game, pitId);
         validateTurn(playerId, game);
         validatePit(game, pitId);
@@ -52,9 +53,14 @@ public class MancalaSowService {
         }
     }
 
-    private void validateGameStarted(MancalaGame game) {
-        if (game.getPlayerTurn() == null) {
-            throw new GameIllegalArgumentException("Game {} has not started yet", game.getId());
+    private void validateGameStatus(MancalaGame game) {
+        if (game.getStatus() != MancalaGameStatus.IN_PROGRESS) {
+            throw new GameIllegalArgumentException(
+                    "Game {} has invalid status {}, should be {}",
+                    game.getId(),
+                    game.getStatus(),
+                    MancalaGameStatus.IN_PROGRESS
+            );
         }
     }
 
