@@ -69,3 +69,5 @@ This guide will walk you through the steps to run the Mancala Game Application, 
    ```
 
    The game web UI will be accessible at [http://localhost:8000](http://localhost:8000).
+
+If you want to play this game on the same device, you should open the URL in incognito mode or in a different browser.
