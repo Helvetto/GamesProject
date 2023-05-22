@@ -65,7 +65,7 @@ This guide will walk you through the steps to run the Mancala Game Application, 
 4. Start the Docker containers using Docker Compose:
 
    ```shell
-   docker-compose -f mancalaa-docker-compose/docker-compose.yml up
+   docker-compose -f mancala-docker-compose/docker-compose.yml up
    ```
 
    The game web UI will be accessible at [http://localhost:8000](http://localhost:8000).
