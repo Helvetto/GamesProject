@@ -179,6 +179,8 @@ mancala:
   cors:
     enabled: true
   ```
+  
+  Rebuild the game API module and the Docker image for the game API backend
 
 7. Access the Mancala API endpoints using the specified paths and HTTP methods. For example, you can make requests
    to `http://localhost:8080/mancala/info` to retrieve game information.
