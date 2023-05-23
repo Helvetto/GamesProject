@@ -27,8 +27,6 @@ Mancala game.
 For detailed instructions on building and running the `mancala-web` module, please refer to the README.md file in
 the `frontend/mancala` directory.
 
-Sure! Here's an updated version of the README.md file with the requested changes:
-
 # Getting Started
 
 [Mancala Game Application](#mancala-game-application)
