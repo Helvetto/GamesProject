@@ -95,7 +95,8 @@ Option 2: Running Docker Compose without Nginx
         cors:
           enabled: true
       ```
-2. Execute the following command to start the containers without Nginx:
+2. Rebuild the game API module and the Docker image for the game API backend
+3. Execute the following command to start the containers without Nginx:
 
 ```shell
 docker-compose -f mancala-docker-compose/without-nginx/docker-compose.yml up
