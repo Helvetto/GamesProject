@@ -93,7 +93,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
         var gamyCopyForLambda = game;
         game = facade.joinGameAndStartIfNeeded(game.id(), null);
 
-        var playerTurn = game.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow();
+        var playerTurn = game.info().playerTurn();
         var pitToStartWith =
                 game.board().pits().stream()
                         .filter(p -> Objects.equals(p.playerId(), playerTurn.id()))
@@ -109,7 +109,8 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
         var gamyCopyForLambda = game;
         game = facade.joinGameAndStartIfNeeded(game.id(), null);
 
-        var wrongPlayerTurn = game.players().stream().filter(p -> !p.isHisTurn()).findFirst().orElseThrow();
+        var playerTurnId = game.info().playerTurn().id();
+        var wrongPlayerTurn = game.players().stream().filter(p -> p.id() != playerTurnId).findFirst().orElseThrow();
         var pitToStartWith =
                 game.board().pits().stream()
                         .filter(p -> Objects.equals(p.playerId(), wrongPlayerTurn.id()))
@@ -130,8 +131,9 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
         var gamyCopyForLambda = game;
         game = facade.joinGameAndStartIfNeeded(game.id(), null);
 
-        var wrongPlayerTurn = game.players().stream().filter(p -> !p.isHisTurn()).findFirst().orElseThrow();
-        var playerTurn = game.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow();
+        var playerTurn = game.info().playerTurn();
+        var wrongPlayerTurn =
+                game.players().stream().filter(p -> !p.id().equals(playerTurn.id())).findFirst().orElseThrow();
         var wrongPitToStartWith =
                 game.board().pits().stream()
                         .filter(p -> Objects.equals(p.playerId(), wrongPlayerTurn.id()))
@@ -152,7 +154,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
         var gamyCopyForLambda = game;
         game = facade.joinGameAndStartIfNeeded(game.id(), null);
 
-        var playerTurn = game.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow();
+        var playerTurn = game.info().playerTurn();
         var pitToStartWith =
                 game.board().pits().stream()
                         .filter(p -> Objects.equals(p.playerId(), playerTurn.id()))
@@ -192,7 +194,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
             return pitToStartLambda;
         });
 
-        var playerTurnId = gameDto.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow().id();
+        var playerTurnId =gameDto.info().playerTurn().id();
         var result = facade.sow(gameId, pitToStart.getId(), playerTurnId);
 
         Assertions.assertThat(result.info().status()).isEqualTo(GameStatusDto.FINISHED);
@@ -229,7 +231,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
             return pitToStartLambda;
         });
 
-        var playerTurnId = gameDto.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow().id();
+        var playerTurnId = gameDto.info().playerTurn().id();
         var result = facade.sow(gameId, pitToStart.getId(), playerTurnId);
 
         Assertions.assertThat(result.info().status()).isEqualTo(GameStatusDto.FINISHED);

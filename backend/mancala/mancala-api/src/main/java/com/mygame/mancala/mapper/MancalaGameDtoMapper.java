@@ -1,15 +1,12 @@
 package com.mygame.mancala.mapper;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 import com.mygame.mancala.DTO.GameStatusDto;
 import com.mygame.mancala.DTO.MancalaGameDto;
 import com.mygame.mancala.DTO.MancalaGameInfoDto;
 import com.mygame.mancala.DTO.PitDto;
 import com.mygame.mancala.DTO.PlayerDto;
-import com.mygame.mancala.model.Board;
 import com.mygame.mancala.model.MancalaGame;
 import com.mygame.mancala.model.MancalaGameStatus;
 import com.mygame.mancala.model.pit.Pit;
@@ -18,7 +15,6 @@ import com.mygame.model.entity.Player;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.ValueMapping;
 
 @Mapper(componentModel = "spring")
 public interface MancalaGameDtoMapper {
@@ -48,7 +44,10 @@ public interface MancalaGameDtoMapper {
     }
 
     default MancalaGameInfoDto getInfo(MancalaGame game) {
-        return new MancalaGameInfoDto(mapStatus(game), findWinner(game), isDraw(game));
+        var playerTurn = game.getPlayerTurn() == null ? null : getPlayerDto(List.of(), game.getPlayerTurn());
+        return new MancalaGameInfoDto(
+                mapStatus(game), findWinner(game), playerTurn, isDraw(game)
+        );
     }
 
     /**
@@ -63,7 +62,7 @@ public interface MancalaGameDtoMapper {
     default List<PlayerDto> getPlayers(List<Player> allPlayers, List<Player> newPlayers, Player playerTurn) {
         var newPlayerIds = newPlayers.stream().map(Player::getId).toList();
         return allPlayers.stream()
-                .map(player -> getPlayerDto(playerTurn, newPlayerIds, player))
+                .map(player -> getPlayerDto(newPlayerIds, player))
                 .toList();
     }
 
@@ -98,7 +97,7 @@ public interface MancalaGameDtoMapper {
 
         if (winningPits.size() == 1) {
             Pit winningPit = winningPits.get(0);
-            return getPlayerDto(null, List.of(), winningPit.getPlayer());
+            return getPlayerDto(List.of(), winningPit.getPlayer());
         } else {
             return null;
         }
@@ -126,10 +125,9 @@ public interface MancalaGameDtoMapper {
                 .count() == 1;
     }
 
-    private static PlayerDto getPlayerDto(Player playerTurn, List<Long> newPlayerIds, Player player) {
+    private static PlayerDto getPlayerDto(List<Long> newPlayerIds, Player player) {
         return new PlayerDto(
                 player.getId(),
-                Objects.equals(player.getId(), playerTurn == null ? null : playerTurn.getId()),
                 newPlayerIds.contains(player.getId())
         );
     }

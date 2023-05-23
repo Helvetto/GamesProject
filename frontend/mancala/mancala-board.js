@@ -29,14 +29,10 @@ function drawBoard(boardData) {
         upperPlayerEl.textContent = `This side of the board belongs to the player with ID  ${upperPlayer.id}`;
     }
 
-    if (lowerPlayer != null && upperPlayer != null) {
-        const turn = document.querySelector('.turn');
-        if (lowerPlayer.isHisTurn) {
-            turn.textContent = `Player ID turn: ${lowerPlayer.id}`;
-        } else {
-            turn.textContent = `Player ID turn: ${upperPlayer.id}`;
-        }
 
+    if (boardData.info.playerTurn != null) {
+        const turn = document.querySelector('.turn');
+        turn.textContent = `Player ID turn: ${boardData.info.playerTurn.id}`;
     }
 
     const mancalaForLowerPlayerID = findMancalaForPlayer(boardData.board.pits, lowerPlayerId);

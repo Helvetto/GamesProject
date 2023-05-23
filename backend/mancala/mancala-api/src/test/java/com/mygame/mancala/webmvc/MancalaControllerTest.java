@@ -42,8 +42,9 @@ public class MancalaControllerTest {
 
     @Test
     void testGetInfo() throws Exception {
-        var players = List.of(new PlayerDto(1L, false, true));
-        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.NOT_STARTED, null, false), null);
+        var players = List.of(new PlayerDto(1L, true));
+        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.NOT_STARTED, null,
+                null, false), null);
 
         when(facade.getInfo(any())).thenReturn(responseDto);
 
@@ -60,8 +61,9 @@ public class MancalaControllerTest {
     @Test
     void testCreateEndpoint() throws Exception {
         var requestBody = new CreateMancalaGameParamsDto(4);
-        var players = List.of(new PlayerDto(1L, false, true));
-        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.NOT_STARTED, null, false), null);
+        var players = List.of(new PlayerDto(1L, true));
+        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.NOT_STARTED, null,
+                null, false), null);
 
         when(facade.createAndJoinGame(any(), any())).thenReturn(responseDto);
 
@@ -83,10 +85,11 @@ public class MancalaControllerTest {
     @Test
     void testJoinEndpointWithNewPlayer() throws Exception {
         var players = List.of(
-                new PlayerDto(1L, false, false),
-                new PlayerDto(2L, false, true)
+                new PlayerDto(1L, false),
+                new PlayerDto(2L, true)
         );
-        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.IN_PROGRESS, null, false), null);
+        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.IN_PROGRESS, null,
+                null, false), null);
         var mockHttpSession = new MockHttpSession();
 
         when(facade.joinGameAndStartIfNeeded(any(), any())).thenReturn(responseDto);
@@ -110,9 +113,10 @@ public class MancalaControllerTest {
     @Test
     void testJoinEndpointWithExistingPlayer() throws Exception {
         var players = List.of(
-                new PlayerDto(1L, false, false)
+                new PlayerDto(1L, false)
         );
-        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.NOT_STARTED, null, false), null);
+        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.NOT_STARTED, null,
+                null, false), null);
         var mockHttpSession = new MockHttpSession();
         mockHttpSession.setAttribute("playerId", 1);
 
@@ -137,10 +141,11 @@ public class MancalaControllerTest {
     @Test
     void testSowEndpoint() throws Exception {
         var players = List.of(
-                new PlayerDto(1L, false, false),
-                new PlayerDto(2L, false, false)
+                new PlayerDto(1L, false),
+                new PlayerDto(2L, false)
         );
-        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.IN_PROGRESS, null, false), null);
+        var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.IN_PROGRESS, null,
+                null, false), null);
         var mockHttpSession = new MockHttpSession();
 
         mockHttpSession.setAttribute(SESSION_PLAYER_ID_ATTRIBUTE, 1);

@@ -11,5 +11,5 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *                          It is needed temporarily to properly set the created player ID cookie,
  *                          but should be removed once Spring Security is implemented.
  */
-public record PlayerDto(Long id, boolean isHisTurn, @JsonIgnore boolean addedToTheGame) {}
+public record PlayerDto(Long id, @JsonIgnore boolean addedToTheGame) {}
 
