@@ -44,19 +44,19 @@ public class MancalaGameCreationService {
         var playerOnePits = preparePits(BOARD_SIZE, numberOfHouseStones, PitType.NORMAL);
         pits.addAll(playerOnePits);
 
-        var playerOneStore = preparePits(1, 0, PitType.MANCALA).get(0);
-        pits.add(playerOneStore);
+        var playerOneMancala = preparePits(1, 0, PitType.MANCALA).get(0);
+        pits.add(playerOneMancala);
 
         var playerTwoPits = preparePits(BOARD_SIZE, numberOfHouseStones, PitType.NORMAL);
         pits.addAll(playerTwoPits);
 
-        var playerTwoStore = preparePits(1, 0, PitType.MANCALA).get(0);
-        pits.add(playerTwoStore);
+        var playerTwoMancala = preparePits(1, 0, PitType.MANCALA).get(0);
+        pits.add(playerTwoMancala);
 
-        linkPits(playerOnePits, playerOneStore);
-        playerOneStore.setNextPit(playerTwoPits.get(0));
-        linkPits(playerTwoPits, playerTwoStore);
-        playerTwoStore.setNextPit(playerOnePits.get(0));
+        linkPits(playerOnePits, playerOneMancala);
+        playerOneMancala.setNextPit(playerTwoPits.get(0));
+        linkPits(playerTwoPits, playerTwoMancala);
+        playerTwoMancala.setNextPit(playerOnePits.get(0));
 
         return boardRepository.save(new Board(pits));
     }
@@ -77,18 +77,18 @@ public class MancalaGameCreationService {
     }
 
     /**
-     * Links the pits of a player together, with the last pit linking to the player's store pit.
+     * Links the pits of a player together, with the last pit linking to the player's mancala pit.
      *
      * @param playerPits     the list of pits belonging to the player
-     * @param playerOneStore the store pit belonging to the player
+     * @param playerOneMancala the mancala pit belonging to the player
      */
-    private static void linkPits(List<Pit> playerPits, Pit playerOneStore) {
+    private static void linkPits(List<Pit> playerPits, Pit playerOneMancala) {
         int size = playerPits.size();
         for (int i = 0; i < size; i++) {
             Pit currentPit = playerPits.get(i);
             Pit nextPit;
             if (i == size - 1) {
-                nextPit = playerOneStore;
+                nextPit = playerOneMancala;
             } else {
                 nextPit = playerPits.get(i + 1);
             }
