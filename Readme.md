@@ -104,9 +104,25 @@ docker-compose -f mancala-docker-compose/without-nginx/docker-compose.yml up
 
 Please choose the option that suits your requirements and system setup.
 
-Note: Regardless of the option you choose, the game web UI will be accessible at http://localhost:8000.
+Certainly! Here's a formatted version of the text with improved aesthetics:
+
+---
+
+**Note:** Regardless of the option you choose, the game web UI will be accessible at http://localhost:8000.
 
 If you want to play this game on the same device, you should open the URL in incognito mode or in a different browser.
+
+Please note that it takes approximately 10 seconds to start all containers. However, if your PC doesn't have Docker images such as nginx, this process may take significantly longer.
+
+Before proceeding, please wait for the following message to appear in the console:
+
+```
+Started MancalaApiApplication
+```
+
+Once you see this message, the game is ready to be played.
+
+---
 
 ### Creating and Starting a New Game
 
