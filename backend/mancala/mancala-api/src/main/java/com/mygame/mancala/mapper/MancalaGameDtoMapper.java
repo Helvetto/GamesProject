@@ -2,6 +2,7 @@ package com.mygame.mancala.mapper;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import com.mygame.mancala.DTO.GameStatusDto;
 import com.mygame.mancala.DTO.MancalaGameDto;
@@ -99,19 +100,32 @@ public interface MancalaGameDtoMapper {
 
     /**
      * Checks if the Mancala game is a draw.
-     * A draw occurs when all the Mancala pits have the same number of stones.
+     * <p>
+     * A draw occurs when all the Mancala pits have the same number of stones,
+     * <p>
+     * except when both Mancala pits are empty, indicating the game is not finished.
      *
      * @param board the game board containing the pits
      * @return {@code true} if the game is a draw, {@code false} otherwise
      */
     default boolean isDraw(Board board) {
-        var count = board.getPits().stream()
+        var mancalaPits = board.getPits().stream()
                 .filter(pit -> pit.getType() == PitType.MANCALA)
-                .filter(pit -> !pit.isEmpty())
+                .toList();
+
+        var emptyMancalaPits = mancalaPits.stream()
+                .filter(Pit::isEmpty)
+                .toList();
+        if (emptyMancalaPits.size() == 2) {
+            // Corner case - when both Mancala pits are empty, the game cannot be a draw
+            // because the game is not finished yet
+            return false;
+        }
+
+        return mancalaPits.stream()
                 .map(Pit::getStones)
                 .distinct()
-                .count();
-        return count <= 1;
+                .count() == 1;
     }
 
     private static PlayerDto getPlayerDto(Player playerTurn, List<Long> newPlayerIds, Player player) {

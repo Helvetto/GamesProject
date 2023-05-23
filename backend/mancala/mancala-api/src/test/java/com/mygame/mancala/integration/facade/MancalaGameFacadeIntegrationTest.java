@@ -6,14 +6,19 @@ import com.mygame.exception.GameIllegalArgumentException;
 import com.mygame.exception.GameIsFullException;
 import com.mygame.mancala.DTO.CreateMancalaGameParamsDto;
 import com.mygame.mancala.DTO.GameStatusDto;
+import com.mygame.mancala.DTO.MancalaGameDto;
 import com.mygame.mancala.DTO.PitTypeDto;
 import com.mygame.mancala.DTO.PlayerDto;
 import com.mygame.mancala.facade.MancalaGameFacade;
 import com.mygame.mancala.integration.IntegrationTest;
+import com.mygame.mancala.model.pit.Pit;
+import com.mygame.mancala.model.pit.PitType;
+import com.mygame.mancala.repository.GameRepository;
 import com.mygame.mancala.repository.PitRepository;
 import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,11 +28,14 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
 
     private final MancalaGameFacade facade;
     private final PitRepository pitRepository;
+    private final TransactionTemplate transactionTemplate;
+    private final GameRepository gameRepository;
 
     @Test
     void shouldThrowWhenTryingCreateAndJoinGame() {
         var exception = assertThrows(
-                GameIllegalArgumentException.class, () -> facade.createAndJoinGame(new CreateMancalaGameParamsDto(3), 1L)
+                GameIllegalArgumentException.class, () -> facade.createAndJoinGame(new CreateMancalaGameParamsDto(3),
+                        1L)
         );
 
         Assertions.assertThat(exception.getMessage()).contains("Number of stones must be at least");
@@ -42,30 +50,31 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
         Assertions.assertThat(result.players()).isNotEmpty();
         Assertions.assertThat(result.info().status()).isEqualTo(GameStatusDto.NOT_STARTED);
         Assertions.assertThat(result.board()).isNotNull();
+        assertThereIsNoWinnerAndIsNotDraw(result);
     }
 
     @Test
     void shouldJoinCreatedGameWithNewPlayerAndStartIt() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
-
         var result = facade.joinGameAndStartIfNeeded(game.id(), null);
 
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.id()).isEqualTo(game.id());
         Assertions.assertThat(result.players()).hasSize(2);
         Assertions.assertThat(result.info().status()).isEqualTo(GameStatusDto.IN_PROGRESS);
+        assertThereIsNoWinnerAndIsNotDraw(result);
     }
 
     @Test
     void shouldDoNothingWhenTryingToJoinAGameWithAnExistingPlayer() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
-
         var result = facade.joinGameAndStartIfNeeded(game.id(), game.players().get(0).id());
 
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.id()).isEqualTo(game.id());
         Assertions.assertThat(result.players()).hasSize(1);
         Assertions.assertThat(result.info().status()).isEqualTo(GameStatusDto.NOT_STARTED);
+        assertThereIsNoWinnerAndIsNotDraw(result);
     }
 
     @Test
@@ -160,5 +169,76 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
         );
 
         Assertions.assertThat(exception.getMessage()).contains("Cannot sow from empty pit");
+    }
+
+    @Test
+    void shouldEndTheGameWithAWinner() {
+        var gameDto = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
+        gameDto = facade.joinGameAndStartIfNeeded(gameDto.id(), null);
+        var gameId = gameDto.id();
+
+        var pitToStart = transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
+
+            gameVarForLambda.getBoard().getPits().forEach(Pit::clear);
+            var pitToStartLambda = gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getNextPit().getType() == PitType.MANCALA)
+                    .findFirst()
+                    .orElseThrow();
+
+            pitToStartLambda.addStones(1);
+            pitRepository.saveAll(gameVarForLambda.getBoard().getPits());
+            return pitToStartLambda;
+        });
+
+        var playerTurnId = gameDto.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow().id();
+        var result = facade.sow(gameId, pitToStart.getId(), playerTurnId);
+
+        Assertions.assertThat(result.info().status()).isEqualTo(GameStatusDto.FINISHED);
+        Assertions.assertThat(result.info().draw()).isFalse();
+        Assertions.assertThat(result.info().winner()).isNotNull();
+    }
+
+    @Test
+    void shouldEndTheGameWithoutAWinnerAndWithDraw() {
+        var gameDto = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
+        gameDto = facade.joinGameAndStartIfNeeded(gameDto.id(), null);
+        var gameId = gameDto.id();
+
+        var pitToStart = transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
+
+            gameVarForLambda.getBoard().getPits().forEach(Pit::clear);
+            var pitToStartLambda = gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getNextPit().getType() == PitType.MANCALA)
+                    .findFirst()
+                    .orElseThrow();
+
+            pitToStartLambda.addStones(1);
+            var oppositePlayerMancala = gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> pit.getType() == PitType.MANCALA)
+                    .filter(pit -> !Objects.equals(pit.getPlayer().getId(), pitToStartLambda.getPlayer().getId()))
+                    .findFirst()
+                    .orElseThrow();
+            oppositePlayerMancala.addStones(1);
+
+            pitRepository.saveAll(gameVarForLambda.getBoard().getPits());
+
+            return pitToStartLambda;
+        });
+
+        var playerTurnId = gameDto.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow().id();
+        var result = facade.sow(gameId, pitToStart.getId(), playerTurnId);
+
+        Assertions.assertThat(result.info().status()).isEqualTo(GameStatusDto.FINISHED);
+        Assertions.assertThat(result.info().draw()).isTrue();
+        Assertions.assertThat(result.info().winner()).isNull();
+    }
+
+    private static void assertThereIsNoWinnerAndIsNotDraw(MancalaGameDto result) {
+        Assertions.assertThat(result.info().winner()).isNull();
+        Assertions.assertThat(result.info().draw()).isFalse();
     }
 }
