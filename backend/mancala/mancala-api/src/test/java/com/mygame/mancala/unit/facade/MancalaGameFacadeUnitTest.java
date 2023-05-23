@@ -1,5 +1,7 @@
 package com.mygame.mancala.unit.facade;
 
+import java.util.List;
+
 import com.mygame.mancala.DTO.CreateMancalaGameParamsDto;
 import com.mygame.mancala.facade.MancalaGameFacade;
 import com.mygame.mancala.mapper.MancalaGameDtoMapper;
@@ -54,10 +56,13 @@ public class MancalaGameFacadeUnitTest extends MockitoUnitTest {
     @Test
     public void testJoinGame() {
         var game = mock(MancalaGame.class);
+
         when(gameRepository.findByIdOrThrow(anyLong())).thenReturn(game);
         when(joinGameService.joinGame(anyLong(), anyLong())).thenReturn(game);
+        when(gamePlayService.startIfNeeded(anyLong())).thenReturn(game);
+        when(game.getPlayers()).thenReturn(List.of());
 
-        facade.joinGame(1L, 2L);
+        facade.joinGameAndStartIfNeeded(1L, 2L);
 
         verify(joinGameService).joinGame(anyLong(), anyLong());
     }

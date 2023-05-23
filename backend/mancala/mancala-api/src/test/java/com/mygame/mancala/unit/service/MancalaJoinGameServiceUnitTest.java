@@ -73,7 +73,6 @@ public class MancalaJoinGameServiceUnitTest extends MockitoUnitTest {
         var result = joinGameService.joinGame(gameId, 2L);
 
         Assertions.assertEquals(game, result);
-        Assertions.assertEquals(MancalaGameStatus.IN_PROGRESS, result.getStatus());
         Assertions.assertEquals(2, result.getPlayers().size());
         Assertions.assertTrue(result.getPlayers().contains(player1));
         Assertions.assertTrue(result.getPlayers().contains(player2));

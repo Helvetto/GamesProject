@@ -2,9 +2,9 @@ package com.mygame.mancala.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-import com.mygame.exception.GameIllegalArgumentException;
 import com.mygame.mancala.model.MancalaGame;
 import com.mygame.mancala.model.MancalaGameStatus;
 import com.mygame.mancala.model.pit.Pit;
@@ -28,6 +28,16 @@ public class MancalaGamePlayService {
         var game = gameRepository.findByIdOrThrow(gameId);
         game = sowService.sow(gameId, pitId, playerId);
         return finishGameIfNeeded(game);
+    }
+
+    @Transactional
+    public MancalaGame startIfNeeded(Long gameId) {
+        var game = gameRepository.findByIdOrThrow(gameId);
+        if (game.isFull()) {
+            startGame(game);
+            return gameRepository.save(game);
+        }
+        return game;
     }
 
 
@@ -102,5 +112,20 @@ public class MancalaGamePlayService {
         }
     }
 
+
+    /**
+     * Starts the mancala game by randomly selecting a player to take the first turn,
+     * setting the game status to "IN_PROGRESS"
+     *
+     * @param game the mancala game to be started
+     * @implNote Uses the {@link Random} class to randomly select a player from the list of players in the game.
+     */
+    private void startGame(MancalaGame game) {
+        var random = new Random();
+        var players = game.getPlayers();
+        var playerTurn = players.get(random.nextInt(players.size()));
+        game.setPlayerTurn(playerTurn);
+        game.setStatus(MancalaGameStatus.IN_PROGRESS);
+    }
 
 }

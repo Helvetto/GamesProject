@@ -48,7 +48,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
     void shouldJoinCreatedGameWithNewPlayerAndStartIt() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
 
-        var result = facade.joinGame(game.id(), null);
+        var result = facade.joinGameAndStartIfNeeded(game.id(), null);
 
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.id()).isEqualTo(game.id());
@@ -60,7 +60,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
     void shouldDoNothingWhenTryingToJoinAGameWithAnExistingPlayer() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
 
-        var result = facade.joinGame(game.id(), game.players().get(0).id());
+        var result = facade.joinGameAndStartIfNeeded(game.id(), game.players().get(0).id());
 
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.id()).isEqualTo(game.id());
@@ -71,10 +71,10 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
     @Test
     void shouldNotAllowToJoinFullGame() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
-        facade.joinGame(game.id(), null);
+        facade.joinGameAndStartIfNeeded(game.id(), null);
 
         assertThrows(
-                GameIsFullException.class, () -> facade.joinGame(game.id(), null)
+                GameIsFullException.class, () -> facade.joinGameAndStartIfNeeded(game.id(), null)
         );
     }
 
@@ -82,7 +82,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
     void shouldSow() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var gamyCopyForLambda = game;
-        game = facade.joinGame(game.id(), null);
+        game = facade.joinGameAndStartIfNeeded(game.id(), null);
 
         var playerTurn = game.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow();
         var pitToStartWith =
@@ -98,7 +98,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
     void shouldThrowOnWrongPlayerTurn() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var gamyCopyForLambda = game;
-        game = facade.joinGame(game.id(), null);
+        game = facade.joinGameAndStartIfNeeded(game.id(), null);
 
         var wrongPlayerTurn = game.players().stream().filter(p -> !p.isHisTurn()).findFirst().orElseThrow();
         var pitToStartWith =
@@ -119,7 +119,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
     void shouldThrowOnWrongPitToStartWith() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var gamyCopyForLambda = game;
-        game = facade.joinGame(game.id(), null);
+        game = facade.joinGameAndStartIfNeeded(game.id(), null);
 
         var wrongPlayerTurn = game.players().stream().filter(p -> !p.isHisTurn()).findFirst().orElseThrow();
         var playerTurn = game.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow();
@@ -141,7 +141,7 @@ public class MancalaGameFacadeIntegrationTest extends IntegrationTest {
     void shouldThrowOnEmptyPitToStartWith() {
         var game = facade.createAndJoinGame(new CreateMancalaGameParamsDto(4), null);
         var gamyCopyForLambda = game;
-        game = facade.joinGame(game.id(), null);
+        game = facade.joinGameAndStartIfNeeded(game.id(), null);
 
         var playerTurn = game.players().stream().filter(PlayerDto::isHisTurn).findFirst().orElseThrow();
         var pitToStartWith =

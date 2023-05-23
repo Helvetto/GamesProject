@@ -31,9 +31,10 @@ public class MancalaGameFacade {
     }
 
     @Transactional
-    public MancalaGameDto joinGame(Long gameId, @Nullable Long playerId) {
+    public MancalaGameDto joinGameAndStartIfNeeded(Long gameId, @Nullable Long playerId) {
         var existingPlayers = gameRepository.findByIdOrThrow(gameId).getPlayers();
         var game = joinGameService.joinGame(gameId, playerId);
+        game = gamePlayService.startIfNeeded(gameId);
         var newPlayers = MancalaUtilService.findNewPlayersAmongAll(existingPlayers, game.getPlayers());
         return mapper.map(game, newPlayers);
     }

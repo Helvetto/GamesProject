@@ -54,7 +54,7 @@ public class MancalaGameController {
     ) {
         var session = request.getSession();
         Long playerId = ControllerHelper.getPlayerIdSessionAttribute(session);
-        var game = facade.joinGame(gameId, playerId);
+        var game = facade.joinGameAndStartIfNeeded(gameId, playerId);
         return getMancalaGameDtoResponseEntity(request, response, game);
     }
 

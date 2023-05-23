@@ -89,7 +89,7 @@ public class MancalaControllerTest {
         var responseDto = new MancalaGameDto(1L, players, new MancalaGameInfoDto(GameStatusDto.IN_PROGRESS, null, false), null);
         var mockHttpSession = new MockHttpSession();
 
-        when(facade.joinGame(any(), any())).thenReturn(responseDto);
+        when(facade.joinGameAndStartIfNeeded(any(), any())).thenReturn(responseDto);
 
 
         var result = mvc.perform(
@@ -116,7 +116,7 @@ public class MancalaControllerTest {
         var mockHttpSession = new MockHttpSession();
         mockHttpSession.setAttribute("playerId", 1);
 
-        when(facade.joinGame(any(), any())).thenReturn(responseDto);
+        when(facade.joinGameAndStartIfNeeded(any(), any())).thenReturn(responseDto);
 
         var result = mvc.perform(
                         post("/mancala/join")
@@ -145,7 +145,7 @@ public class MancalaControllerTest {
 
         mockHttpSession.setAttribute(SESSION_PLAYER_ID_ATTRIBUTE, 1);
 
-        when(facade.joinGame(any(), any())).thenReturn(responseDto);
+        when(facade.joinGameAndStartIfNeeded(any(), any())).thenReturn(responseDto);
         when(facade.sow(any(), any(), any())).thenReturn(responseDto);
 
         var result = mvc.perform(

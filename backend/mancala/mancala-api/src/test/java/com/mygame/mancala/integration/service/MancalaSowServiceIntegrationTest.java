@@ -9,8 +9,10 @@ import com.mygame.mancala.integration.IntegrationTest;
 import com.mygame.mancala.model.MancalaGame;
 import com.mygame.mancala.model.pit.Pit;
 import com.mygame.mancala.model.pit.PitType;
+import com.mygame.mancala.repository.GameRepository;
 import com.mygame.mancala.repository.PitRepository;
 import com.mygame.mancala.service.MancalaGameCreationService;
+import com.mygame.mancala.service.MancalaGamePlayService;
 import com.mygame.mancala.service.MancalaJoinGameService;
 import com.mygame.mancala.service.MancalaSowService;
 import com.mygame.model.entity.Player;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.support.TransactionTemplate;
 import repository.PlayerRepository;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +32,9 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     private final MancalaGameCreationService gameCreationService;
     private final PlayerRepository playerRepository;
     private final MancalaJoinGameService joinGameService;
+    private final MancalaGamePlayService gamePlayService;
+    private final TransactionTemplate transactionTemplate;
+    private final GameRepository gameRepository;
 
     private final PitRepository pitRepository;
 
@@ -57,13 +63,12 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     void shouldNotAllowToSowWithWrongPlayerId() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
-
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
-
+        game = gamePlayService.startIfNeeded(game.getId());
         var gameVarForLambda = game;
-        var pitToStart = getWrongPitToStartWith(game, gameVarForLambda);
+        var pitToStart = getWrongPitToStartWith(game);
 
         var exception = assertThrows(
                 GameIllegalArgumentException.class,
@@ -74,28 +79,32 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     }
 
     @NotNull
-    private static Pit getWrongPitToStartWith(MancalaGame game, MancalaGame gameVarForLambda) {
-        return game.getBoard().getPits().stream()
-                .filter(pit -> !Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
-                .filter(pit -> pit.getType() != PitType.MANCALA)
-                .findAny().orElseThrow();
+    private Pit getWrongPitToStartWith(MancalaGame game) {
+        var gameId = game.getId();
+
+        return Objects.requireNonNull(transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
+
+            return gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> !Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getType() != PitType.MANCALA)
+                    .findAny().orElseThrow();
+        }));
     }
 
     @Test
     void shouldNotAllowToSowOnOtherPlayerTurn() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
-
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
+        game = gamePlayService.startIfNeeded(game.getId());
 
         var notActivePlayerId = Objects.equals(game.getPlayerTurn().getId(), playerOne.getId()) ?
                 playerTwo.getId() : playerOne.getId();
-
         var gameVarForLambda = game;
-
-        var pitToStart = getWrongPitToStartWith(game, gameVarForLambda);;
+        var pitToStart = getWrongPitToStartWith(game);
 
         var exception = assertThrows(
                 GameIllegalArgumentException.class,
@@ -109,14 +118,12 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     void shouldNotAllowToSowFromOtherPlayerPit() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
-
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
-
+        game = gamePlayService.startIfNeeded(game.getId());
         var gameVarForLambda = game;
-
-        var pitToStart = getWrongPitToStartWith(game, gameVarForLambda);;
+        var pitToStart = getWrongPitToStartWith(game);
 
         var exception = assertThrows(
                 GameIllegalArgumentException.class,
@@ -131,25 +138,29 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     void shouldNotAllowToSowFromEmptyPit() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
-
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
+        game = gamePlayService.startIfNeeded(game.getId());
+        var gameId = game.getId();
 
-        var gameVarForLambda = game;
+        var pitToStart = transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
+            var pitToStartLambda = gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getType() != PitType.MANCALA)
+                    .filter(pit -> pit.getNextPit().getType() != PitType.MANCALA)
+                    .findFirst()
+                    .orElseThrow();
 
-        var pitToStart = game.getBoard().getPits().stream()
-                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
-                .filter(pit -> pit.getType() != PitType.MANCALA)
-                .findAny().orElseThrow();
+            pitToStartLambda.clear();
+            return pitRepository.save(pitToStartLambda);
+        });
 
-        pitToStart.clear();
-        pitRepository.save(pitToStart);
-
+        var playerTurnId = game.getPlayerTurn().getId();
         var exception = assertThrows(
                 GameIllegalArgumentException.class,
-                () -> sowService.sow(gameVarForLambda.getId(), pitToStart.getId(),
-                        gameVarForLambda.getPlayerTurn().getId())
+                () -> sowService.sow(gameId, pitToStart.getId(), playerTurnId)
         );
 
         Assertions.assertThat(exception.getMessage()).isEqualTo("Cannot sow from empty pit " + pitToStart.getId());
@@ -159,22 +170,25 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     void shouldNotAllowToSowFromMancalaPit() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
-
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
+        game = gamePlayService.startIfNeeded(game.getId());
+        var gameId = game.getId();
 
-        var gameVarForLambda = game;
+        var pitToStart = transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
 
-        var pitToStart = game.getBoard().getPits().stream()
-                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
-                .filter(pit -> pit.getType() == PitType.MANCALA)
-                .findAny().orElseThrow();
+            return gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getType() == PitType.MANCALA)
+                    .findAny().orElseThrow();
+        });
 
+        var playerTurnId = game.getPlayerTurn().getId();
         var exception = assertThrows(
                 GameIllegalArgumentException.class,
-                () -> sowService.sow(gameVarForLambda.getId(), pitToStart.getId(),
-                        gameVarForLambda.getPlayerTurn().getId())
+                () -> sowService.sow(gameId, pitToStart.getId(), playerTurnId)
         );
 
         Assertions.assertThat(exception.getMessage()).isEqualTo("Cannot sow from mancala!");
@@ -184,28 +198,29 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     void shouldSuccessfullySowAndSwitchActivePlayer() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
-
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(7));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
+        game = gamePlayService.startIfNeeded(game.getId());
+        var gameId = game.getId();
 
-        var gameVarForLambda = game;
+        var pitToStart = transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
 
-        var pitToStart = game.getBoard().getPits().stream()
-                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
-                .filter(pit -> pit.getType() == PitType.NORMAL)
-                .findAny().orElseThrow();
+            return gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getType() == PitType.NORMAL)
+                    .findAny().orElseThrow();
+        });
 
-        var result = sowService.sow(gameVarForLambda.getId(), pitToStart.getId(),
-                gameVarForLambda.getPlayerTurn().getId());
-
-
+        var playerTurnId = game.getPlayerTurn().getId();
+        var result = sowService.sow(gameId, pitToStart.getId(), playerTurnId);
         var resultPits = result.getBoard().getPits();
+
         Assertions.assertThat(
                         resultPits.stream()
                                 .anyMatch(pit -> Objects.equals(pit.getId(), pitToStart.getId())))
                 .isTrue();
-
         Assertions.assertThat(
                         resultPits.stream()
                                 .anyMatch(pit -> pit.getType() == PitType.MANCALA && !pit.isEmpty()))
@@ -217,25 +232,28 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     void shouldGetAnotherTurn() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
-
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
-        var gameVarForLambda = game;
+        game = gamePlayService.startIfNeeded(game.getId());
+        var gameId = game.getId();
 
-        var pitToStart = game.getBoard().getPits().stream()
-                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
-                .filter(pit -> pit.getNextPit().getType() == PitType.MANCALA)
-                .findFirst()
-                .orElseThrow();
+        var pitToStart = transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
 
-        pitToStart.clear();
-        pitToStart.addStones(1);
-        pitRepository.save(pitToStart);
+            var pitToStartLambda = gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getNextPit().getType() == PitType.MANCALA)
+                    .findFirst()
+                    .orElseThrow();
 
-        var result = sowService.sow(gameVarForLambda.getId(), pitToStart.getId(),
-                gameVarForLambda.getPlayerTurn().getId());
+            pitToStartLambda.clear();
+            pitToStartLambda.addStones(1);
+            return pitRepository.save(pitToStartLambda);
+        });
 
+        var playerTurnId = game.getPlayerTurn().getId();
+        var result = sowService.sow(gameId, pitToStart.getId(), playerTurnId);
 
         Assertions.assertThat(result.getPlayerTurn().getId()).isEqualTo(game.getPlayerTurn().getId());
     }
@@ -244,33 +262,37 @@ public class MancalaSowServiceIntegrationTest extends IntegrationTest {
     void shouldCaptureOppositeStonesAndAddToMancala() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
-
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
-        var gameVarForLambda = game;
+        game = gamePlayService.startIfNeeded(game.getId());
+        var gameId = game.getId();
 
-        var pitToStart = game.getBoard().getPits().stream()
-                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
-                .filter(pit -> pit.getType() != PitType.MANCALA)
-                .filter(pit -> pit.getNextPit().getType() != PitType.MANCALA)
-                .findFirst()
-                .orElseThrow();
+        var pitToStart = transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
+            var pitToStartLambda = gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getType() != PitType.MANCALA)
+                    .filter(pit -> pit.getNextPit().getType() != PitType.MANCALA)
+                    .findFirst()
+                    .orElseThrow();
 
-        pitToStart.clear();
-        pitToStart.addStones(1);
+            pitToStartLambda.clear();
+            pitToStartLambda.addStones(1);
 
-        var nextPit = pitToStart.getNextPit();
-        nextPit.clear();
-        pitRepository.save(pitToStart);
-        pitRepository.save(nextPit);
+            var nextPit = pitToStartLambda.getNextPit();
+            nextPit.clear();
+            pitRepository.save(nextPit);
+            return pitRepository.save(pitToStartLambda);
 
-        var result = sowService.sow(gameVarForLambda.getId(), pitToStart.getId(),
-                gameVarForLambda.getPlayerTurn().getId());
+        });
 
+
+        var result = sowService.sow(gameId, pitToStart.getId(), game.getPlayerTurn().getId());
+        var playerTurnId = game.getPlayerTurn().getId();
         var resultMancala = result.getBoard().getPits().stream()
                 .filter(pit -> pit.getType() == PitType.MANCALA)
-                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                .filter(pit -> Objects.equals(pit.getPlayer().getId(), playerTurnId))
                 .findFirst()
                 .orElseThrow();
 

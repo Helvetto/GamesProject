@@ -34,7 +34,7 @@ public class MancalaJoinGameServiceIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    void shouldJoinAGameWithOnePlayerAndStartIt() {
+    void shouldJoinAGameWithOnePlayer() {
         var playerOne = playerRepository.save(new Player());
         var playerTwo = playerRepository.save(new Player());
 
@@ -43,7 +43,6 @@ public class MancalaJoinGameServiceIntegrationTest extends IntegrationTest {
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
 
         assertThat(game.getPlayers().size()).isEqualTo(2);
-        assertThat(game.getStatus()).isEqualTo(MancalaGameStatus.IN_PROGRESS);
         assertThat(game.isFull()).isTrue();
     }
 

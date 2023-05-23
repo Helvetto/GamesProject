@@ -7,6 +7,7 @@ import com.mygame.mancala.integration.IntegrationTest;
 import com.mygame.mancala.model.MancalaGameStatus;
 import com.mygame.mancala.model.pit.Pit;
 import com.mygame.mancala.model.pit.PitType;
+import com.mygame.mancala.repository.GameRepository;
 import com.mygame.mancala.repository.PitRepository;
 import com.mygame.mancala.service.MancalaGameCreationService;
 import com.mygame.mancala.service.MancalaGamePlayService;
@@ -26,7 +27,8 @@ public class MancalaGamePlayServiceIntegrationTest extends IntegrationTest {
     private final MancalaJoinGameService joinGameService;
     private final PlayerRepository playerRepository;
     private final PitRepository pitRepository;
-
+    private final GameRepository gameRepository;
+    private final TransactionTemplate transactionTemplate;
 
     @Test
     void shouldFinishGame() {
@@ -35,16 +37,24 @@ public class MancalaGamePlayServiceIntegrationTest extends IntegrationTest {
         var game = gameCreationService.createGame(new CreateMancalaGameParamsDto(4));
         game = joinGameService.joinGame(game.getId(), playerOne.getId());
         game = joinGameService.joinGame(game.getId(), playerTwo.getId());
-        var gameVarForLambda = game;
-        game.getBoard().getPits().forEach(Pit::clear);
-        var pitToStart = game.getBoard().getPits().stream()
-                .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
-                .filter(pit -> pit.getNextPit().getType() == PitType.MANCALA)
-                .findFirst()
-                .orElseThrow();
+        game = gamePlayService.startIfNeeded(game.getId());
+        var gameId = game.getId();
 
-        pitToStart.addStones(1);
-        pitRepository.saveAll(game.getBoard().getPits());
+        var pitToStart = transactionTemplate.execute(ts -> {
+            var gameVarForLambda = gameRepository.findByIdOrThrow(gameId);
+
+            gameVarForLambda.getBoard().getPits().forEach(Pit::clear);
+            var pitToStartLambda = gameVarForLambda.getBoard().getPits().stream()
+                    .filter(pit -> Objects.equals(pit.getPlayer().getId(), gameVarForLambda.getPlayerTurn().getId()))
+                    .filter(pit -> pit.getNextPit().getType() == PitType.MANCALA)
+                    .findFirst()
+                    .orElseThrow();
+
+            pitToStartLambda.addStones(1);
+            pitRepository.saveAll(gameVarForLambda.getBoard().getPits());
+            return pitToStartLambda;
+        });
+
 
         var result = gamePlayService.sow(game.getId(), pitToStart.getId(), game.getPlayerTurn().getId());
         Assertions.assertThat(result.getBoard().getPits().stream().filter(pit -> pit.getType() != PitType.MANCALA).allMatch(Pit::isEmpty)).isTrue();
