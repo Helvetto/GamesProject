@@ -14,6 +14,8 @@ the API is `/mancala`.
 - Liquibase: A database schema management and versioning tool that helps in managing database changes over time.
 - Docker: A containerization platform that allows for easy packaging and deployment of applications, ensuring
   consistency across different environments.
+- Nginx: A high-performance web server and reverse proxy server that can be used to improve the performance and
+  scalability of web applications.
 
 ## Endpoints
 
@@ -132,6 +134,51 @@ If you have made any modifications to the environment variables, double-check th
 
    This command will start the Mancala API container, the PostgreSQL database container, and any other specified
    services.
+
+If you want to run the Mancala API without the Nginx server, you need to edit the `docker-compose.yml` file and comment or remove the following section:
+
+  ```
+mancala-nginx:
+  # Use the 'nginx' image as the base for this service
+  image: nginx
+  # Map port 80 on the host to port 8080 in the container.
+  # This allows accessing the Nginx service from the host machine.
+  ports:
+    - "8080:80"
+  # Define a custom container name for this service
+  container_name: mancala-nginx
+  # Mount the nginx.conf file from the local machine to the container.
+  # This allows using a custom Nginx configuration.
+  volumes:
+    - ../../../nginx/mancala-nginx/nginx.conf:/etc/nginx/nginx.conf
+  ```
+
+and uncomment the following section:
+```
+#    # Map port 8080 on the host to port 8080 in the container.
+#    # This allows accessing the 'mancala-api' service from the host machine.
+#    ports:
+#      - "8080:8080"
+```
+
+Comment:
+Please note that running the Mancala API without the Nginx server may affect certain functionalities or configurations. Make sure to review your requirements before making any changes.
+
+Additionally, you need to make a modification in the `application.yml` file. Find the following section:
+
+  ```
+mancala:
+  cors:
+    enabled: false
+  ```
+
+and change it to:
+
+  ```
+mancala:
+  cors:
+    enabled: true
+  ```
 
 7. Access the Mancala API endpoints using the specified paths and HTTP methods. For example, you can make requests
    to `http://localhost:8080/mancala/info` to retrieve game information.
