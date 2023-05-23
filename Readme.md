@@ -78,7 +78,24 @@ docker-compose -f mancala-docker-compose/docker-compose.yml up
 
 Option 2: Running Docker Compose without Nginx
 
-1. Execute the following command to start the containers without Nginx:
+1. Edit the `application.yml` file:
+
+   Go to `backend/mancala/mancala-api/src/main/resources` and open the `application.yml` file. Locate the following section:
+
+      ```yaml
+      mancala:
+        cors:
+          enabled: false
+      ```
+
+   Change `enabled` from `false` to `true`:
+
+      ```yaml
+      mancala:
+        cors:
+          enabled: true
+      ```
+2. Execute the following command to start the containers without Nginx:
 
 ```shell
 docker-compose -f mancala-docker-compose/without-nginx/docker-compose.yml up

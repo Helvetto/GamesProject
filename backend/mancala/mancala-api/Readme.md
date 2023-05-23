@@ -144,12 +144,8 @@ If you have made any modifications to the environment variables, double-check th
   state persistence in case of backend reloads or when users close their browsers. Additionally, ensure proper security
   measures using the Spring Security library.
 
-- Refactor the application to remove the CorsFilter dependency and integrate an Nginx proxy into the docker-compose
-  setup. This will provide a more robust and efficient way to handle cross-origin requests.
-
 - Refactor the application to create a separate endpoint for starting the game and remove the starting game
-  functionality
-  from the join endpoint.
+  functionality from the join endpoint.
 
 - Implement Redis caching to improve performance and reduce load on the backend server.
 

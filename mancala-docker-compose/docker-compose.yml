@@ -51,10 +51,10 @@ services:
     ports:
       - "8000:8000"
 
-  nginx:
+  mancala-nginx:
     image: nginx
     ports:
       - "8080:80"
-    container_name: nginx-mancala
+    container_name: mancala-nginx
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf

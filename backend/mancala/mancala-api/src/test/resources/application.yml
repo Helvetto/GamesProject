@@ -4,3 +4,8 @@ spring:
     show-sql: true
   liquibase:
     change-log: liquibase/changelog-master.xml
+
+mancala:
+  cors:
+    enabled: false
+    access-allow-origin-header: "http://localhost:8000"

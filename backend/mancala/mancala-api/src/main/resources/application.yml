@@ -11,3 +11,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
     change-log: liquibase/changelog-master.xml
+
+mancala:
+  cors:
+    enabled: false
+    access-allow-origin-header: "http://localhost:8000"
