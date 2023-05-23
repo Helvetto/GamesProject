@@ -48,7 +48,7 @@ public interface MancalaGameDtoMapper {
     }
 
     default MancalaGameInfoDto getInfo(MancalaGame game) {
-        return new MancalaGameInfoDto(mapStatus(game), findWinner(game.getBoard()), isDraw(game.getBoard()));
+        return new MancalaGameInfoDto(mapStatus(game), findWinner(game), isDraw(game));
     }
 
     /**
@@ -67,15 +67,21 @@ public interface MancalaGameDtoMapper {
                 .toList();
     }
 
+
     /**
      * Finds the winner of the Mancala game based on the number of stones in the Mancala pits.
      * The winner is determined by comparing the stone counts of the Mancala pits.
      * If there is only one pit with the maximum stone count, that player is declared the winner.
+     * <p>The game status must be {@link MancalaGameStatus#FINISHED} for the winner to be determined.
      *
-     * @param board the game board containing the pits
+     * @param game the {@link MancalaGame} instance representing the game
      * @return the {@link PlayerDto} representing the winner, or {@code null} if there is no winner
      */
-    default PlayerDto findWinner(Board board) {
+    default PlayerDto findWinner(MancalaGame game) {
+        if (game.getStatus() != MancalaGameStatus.FINISHED) {
+            return null;
+        }
+        var board = game.getBoard();
         var nonEmptyMancalaPits = board.getPits().stream()
                 .filter(pit -> pit.getType() == PitType.MANCALA)
                 .filter(pit -> !pit.isEmpty())
@@ -99,30 +105,22 @@ public interface MancalaGameDtoMapper {
     }
 
     /**
-     * Checks if the Mancala game is a draw.
-     * <p>
-     * A draw occurs when all the Mancala pits have the same number of stones,
-     * <p>
-     * except when both Mancala pits are empty, indicating the game is not finished.
+     * Determines if the Mancala game is a draw based on the Macala game rules.
      *
-     * @param board the game board containing the pits
+     * @param game the Mancala game instance to check
      * @return {@code true} if the game is a draw, {@code false} otherwise
+     * @implNote A Mancala game is considered a draw if it meets the following conditions:
+     * - The game must be in the "FINISHED" state.
+     * - The number of stones in all the Mancala pits must be equal.
+     * In other words, all the Mancala pits must contain the same number of stones.
      */
-    default boolean isDraw(Board board) {
-        var mancalaPits = board.getPits().stream()
-                .filter(pit -> pit.getType() == PitType.MANCALA)
-                .toList();
-
-        var emptyMancalaPits = mancalaPits.stream()
-                .filter(Pit::isEmpty)
-                .toList();
-        if (emptyMancalaPits.size() == 2) {
-            // Corner case - when both Mancala pits are empty, the game cannot be a draw
-            // because the game is not finished yet
+    default boolean isDraw(MancalaGame game) {
+        if (game.getStatus() != MancalaGameStatus.FINISHED) {
             return false;
         }
-
-        return mancalaPits.stream()
+        var board = game.getBoard();
+        return board.getPits().stream()
+                .filter(pit -> pit.getType() == PitType.MANCALA)
                 .map(Pit::getStones)
                 .distinct()
                 .count() == 1;
