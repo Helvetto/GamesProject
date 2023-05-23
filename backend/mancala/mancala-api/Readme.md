@@ -103,7 +103,7 @@ Please review and validate the following configurations:
 **Dockerfile:**
 
 ```dockerfile
-ENV DB_HOST=dbpos
+ENV DB_HOST=mancala-dbpos
 ENV DB_NAME=postgres
 ENV DB_USERNAME=postgres
 ENV DB_PASSWORD=postgres
@@ -117,7 +117,7 @@ environment:
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
   POSTGRES_USER: ${POSTGRES_USER:-postgres}
   POSTGRES_DB: postgres
-  DB_HOST: dbpos
+  DB_HOST: mancala-dbpos
 ```
 
 Ensure that the values for `DB_HOST`, `DB_NAME`, `DB_USERNAME`, and `DB_PASSWORD` are consistent across both files to

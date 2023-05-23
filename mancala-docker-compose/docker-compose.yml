@@ -7,7 +7,7 @@ services:
     image: postgres
 
     # Assign a name to the container
-    container_name: "dbpos"
+    container_name: "mancala-dbpos"
 
     # Environment variables for the container
     environment:
@@ -22,8 +22,8 @@ services:
       # Set the name of the PostgreSQL database to 'postgres'
       POSTGRES_DB: postgres
 
-      # Set the hostname of the 'db' service to 'dbpos'
-      DB_HOST: dbpos
+      # Set the hostname of the 'db' service to 'mancala-dbpos'
+      DB_HOST: mancala-dbpos
 
   # Definition of the 'mancala-api' service
   mancala-api:
