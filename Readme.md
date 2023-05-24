@@ -102,8 +102,6 @@ docker-compose -f mancala-docker-compose/without-nginx/docker-compose.yml up
 
 Please choose the option that suits your requirements and system setup.
 
-Certainly! Here's a formatted version of the text with improved aesthetics:
-
 ---
 
 **Note:** Regardless of the option you choose, the game web UI will be accessible at http://localhost:8000.
